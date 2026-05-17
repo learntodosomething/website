@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Link to custom stylesheets -->
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="stylee.css" />
+    <!-- Bootstrap stylesheets -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-B4gt1jrGC7Jh4AgTPSdUtOBvfO8sh+WyOoHnA65z5eLvGKxYb0s0nE+IarE+7MWp" crossorigin="anonymous">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>LOGIN Area</title>
+    <style>
+    body {
+        position: relative;
+        height: 100vh;
+        background-image: url("reg.png");
+        background-size: cover;
+        background-position: center;
+    }
+    p {
+        text-align: center;
+        font-size: 18px;
+        color: #333;
+        padding: 20px;
+    }
+    #msg {
+        font-weight: bold;
+        color: #ff1900;
+    }
+    </style>
+</head>
+<body>
+
+<script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+<script>
+    $(document).ready(function(){
+        // Switch to registration form on click
+        $("#register").click(function(){
+            $("#login").css("background-color", "#ecf0f1");
+            $("#login > span").css("color", "#333");
+            $("#register").css("background-color", "#e74c3c");
+            $("#register > span").css("color", "white");
+            $("#l-f").toggle(500);
+            $("#r-f").toggle(1000);
+        })
+
+        // Switch to login form on click
+        $("#login").click(function(){
+            $("#register").css("background-color", "#ecf0f1");
+            $("#register > span").css("color", "#333");
+            $("#login").css("background-color", "#e74c3c");
+            $("#login > span").css("color", "white");
+            $("#l-f").toggle(1000);
+            $("#r-f").toggle(500);
+        })
+    });
+</script>
+
+<div class="lr-wrapper" align="center">
+    <div class="lr-content">
+        <div class="lr-head">
+            <!-- Login and SignUp buttons -->
+            <div class="lr-l_b" id="login">
+                <div></div>
+                <span>Login</span>
+            </div>
+            <div class="lr-r_b" id="register">
+                <div></div>
+                <span>SignUp</span>
+            </div>
+        </div>
+        <div class="lr-main">
+            <!-- Login Form -->
+            <form method="DELETE" id="l-f" action="javascript:login();">
+                <p><span id="msg1"></span></p>
+                <input type="text" id="username_login" name="l-username" class="l-username" placeholder="Username"/>
+                <input type="password" id="password_login" name="l-password" class="l-password" placeholder="Password"/>
+                <input type="button" value="Login" onclick="run1()">
+            </form>
+
+            <!-- Registration Form -->
+            <form method="DELETE" id="r-f" action="javascript:login();">
+                <p><span id="msg"></span></p>
+                <input type="email" id="r-email" class="r-email" name="r-email" placeholder="Email"/>
+                <input type="text" id="fname" name="r-username" class="r-username" placeholder="Username"/>
+                <input type="password" id="lname" name="r-password" class="r-password" placeholder="Password"/>
+                <input type="button" value="Register" onclick="run2()">
+                <br>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="jquery-3.7.1.min.js"></script>
+<script>
+    // Function to handle registration form submission
+    function run2() {
+        var f = $("#fname").val();
+        var l = $("#lname").val();
+        var email = $("#r-email").val(); // Added line to get the value of "r-email"
+        var formdata = new FormData();
+        formdata.append("fname", f);
+        formdata.append("lname", l);
+        formdata.append("email", email); // Added line to append "r-email" to FormData
+        
+        $.post({
+            url: "/Hello/Post",
+            data: formdata,
+            processData: false,
+            contentType: false,
+            success: update
+        });
+    }
+
+    // Function to update the message span with the result
+    function update(a) {
+        $("#msg").text(a);
+    }
+</script>
+
+<script>
+// Function to handle login form submission
+    function run1() {
+        var email = $("#username_login").val();
+        var pass = $("#password_login").val();
+
+        $.post({
+            url: "/Hello/Login",
+            data: { email: email, pass: pass },
+            success: function(response) {
+                // Handle the response, display the message in #msg1
+                $("#msg1").text(response);
+
+                // Set a cookie to indicate successful login
+                document.cookie = "LoggedIn=true; path=/";
+
+                // Redirect to index.html
+                window.location.href = "index.html";
+            },
+            error: function(error) {
+                // Handle the error, display an error message
+                $("#msg1").text("Error: " + error.responseText);
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

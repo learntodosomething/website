@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style_index.css"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Közösségi Oldal - Főoldal</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Navigáció -->
+        <nav class="navbar">
+            <ul class="nav_items">
+                <li class="nav_item">
+                    <a href="#" class="nav_link active">🏠 Főoldal</a>
+                    <a href="#" class="nav_link">🔧 Szolgáltatások</a>
+                    <a href="#" class="nav_link">📞 Kapcsolat</a>
+                </li>
+                <li>
+                    <button class="logout-btn" onclick="logout()">🚪 Kijelentkezés</button>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Üzenet megjelenítés -->
+        <div id="message"></div>
+
+        <!-- Fő tartalom -->
+        <div class="main-content">
+            <!-- Posztok szekció -->
+            <div class="posts-section">
+                <!-- Poszt létrehozása -->
+                <div class="post-form">
+                    <h3>📝 Új bejegyzés létrehozása</h3>
+                    <form id="postForm">
+                        <div class="form-group">
+                            <label for="content">💭 Mit gondolsz?</label>
+                            <textarea id="content" name="content" placeholder="Oszd meg gondolataidat a közösséggel..." required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="image">🖼️ Kép feltöltése (opcionális)</label>
+                            <input type="file" id="image" name="image" accept="image/*">
+                        </div>
+                        <button type="submit" class="submit-btn">🚀 Bejegyzés közzététele</button>
+                    </form>
+                </div>
+
+                <!-- Bejegyzések -->
+                <div id="posts">
+                    <div style="text-align: center; padding: 40px; color: #666;">
+                        <div style="font-size: 3em; margin-bottom: 20px;">⏳</div>
+                        <p>Bejegyzések betöltése...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <h3>📊 Statisztikák</h3>
+                    <div class="stats">
+                        <div class="stat-item">🎯 Aktív felhasználók</div>
+                        <div class="stat-item">📝 Mai bejegyzések</div>
+                        <div class="stat-item">💬 Összkommentek</div>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>🔥 Trend témák</h3>
+                    <div style="color: #666; font-style: italic;">
+                        <p>📱 Technológia</p>
+                        <p>🌱 Környezetvédelem</p>
+                        <p>🎨 Művészet</p>
+                        <p>🏃‍♂️ Sport</p>
+                    </div>
+                </div>
+
+                <div class="sidebar-section">
+                    <h3>💡 Tippek</h3>
+                    <div style="font-size: 14px; color: #666; line-height: 1.6;">
+                        <p>• Légy kedves és tiszteletteljes</p>
+                        <p>• Oszd meg érdekes tartalmakat</p>
+                        <p>• Reagálj mások bejegyzéseire</p>
+                        <p>• Használj releváns képeket</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kijelentkezés
+        function logout() {
+            // Cookie törlése
+            document.cookie = "LoggedIn=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+            window.location.href = "register.html";
+        }
+
+        // FEJLESZTÉS CÉLJÁBÓL: Session beállítás szimuláció
+        function simulateLogin() {
+            // Szimulált bejelentkezés - session létrehozása
+            $.ajax({
+                url: '/test-login',
+                type: 'POST',
+                data: { userId: 1 }, // Teszt felhasználó ID
+                success: function() {
+                    console.log("🔓 Fejlesztői mód: Session létrehozva");
+                    document.cookie = "LoggedIn=true; path=/";
+                },
+                error: function() {
+                    // Ha nincs test endpoint, csak cookie-t állítunk be
+                    document.cookie = "LoggedIn=true; path=/";
+                    console.log("🔓 Fejlesztői mód: Cookie alapú szimuláció");
+                }
+            });
+        }
+
+        // Ellenőrzi, hogy be van-e jelentkezve
+        function checkLogin() {
+            if (!document.cookie.includes("LoggedIn=true")) {
+                // FEJLESZTÉS CÉLJÁBÓL: Automatikus bejelentkezés
+                console.log("⚠️ Nincs bejelentkezve, fejlesztői mód aktiválása...");
+                simulateLogin();
+                return true;
+                
+                // Éles környezetben használd ezt:
+                // window.location.href = "register.html";
+                // return false;
+            }
+            return true;
+        }
+
+        // Üzenet megjelenítése
+        function showMessage(message, type = 'info') {
+            const messageDiv = $('#message');
+            messageDiv.removeClass('error success info').addClass(type);
+            messageDiv.text(message).show();
+            setTimeout(() => messageDiv.hide(), 5000);
+        }
+
+        // Bejegyzés küldése
+        $('#postForm').on('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            // Debug információ
+            console.log('📤 Poszt küldése...', {
+                content: formData.get('content'),
+                image: formData.get('image')?.name || 'nincs'
+            });
+            
+            $.ajax({
+                url: '/Post/CreatePost',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    console.log('✅ Poszt sikeresen létrehozva:', response);
+                    showMessage('✅ Bejegyzés sikeresen létrehozva!', 'success');
+                    $('#postForm')[0].reset();
+                    loadPosts();
+                },
+                error: function(xhr) {
+                    console.error('❌ Poszt küldési hiba:', xhr);
+                    let errorMsg = xhr.responseText || xhr.statusText || 'Ismeretlen hiba';
+                    showMessage('❌ Hiba: ' + errorMsg, 'error');
+                }
+            });
+        });
+
+        // Komment hozzáadása
+        function addComment(postId) {
+            const commentInput = $(`#comment-${postId}`);
+            const content = commentInput.val().trim();
+            
+            if (!content) {
+                showMessage('❌ A komment nem lehet üres!', 'error');
+                return;
+            }
+            
+            $.ajax({
+                url: '/Post/AddComment',
+                type: 'POST',
+                data: {
+                    postId: postId,
+                    content: content
+                },
+                success: function(response) {
+                    showMessage('✅ Komment hozzáadva!', 'success');
+                    commentInput.val('');
+                    loadPosts();
+                },
+                error: function(xhr) {
+                    showMessage('❌ Hiba: ' + xhr.responseText, 'error');
+                }
+            });
+        }
+
+        // Enter billentyű kezelése komment mezőkben
+        $(document).on('keypress', 'input[id^="comment-"]', function(e) {
+            if (e.which === 13) { // Enter billentyű
+                const postId = this.id.replace('comment-', '');
+                addComment(parseInt(postId));
+            }
+        });
+
+        // Bejegyzések betöltése
+        function loadPosts() {
+            console.log('📥 Posztok betöltése...');
+            
+            $.ajax({
+                url: '/Post/GetPosts',
+                type: 'GET',
+                success: function(posts) {
+                    console.log('✅ Posztok sikeresen betöltve:', posts);
+                    displayPosts(posts);
+                },
+                error: function(xhr) {
+                    console.error('❌ Posztok betöltési hiba:', xhr);
+                    let errorMsg = xhr.responseText || xhr.statusText || 'Ismeretlen hiba';
+                    $('#posts').html(`
+                        <div style="text-align: center; padding: 40px; color: #dc3545;">
+                            <div style="font-size: 3em; margin-bottom: 20px;">⚠️</div>
+                            <h3>Hiba a bejegyzések betöltése során</h3>
+                            <p style="margin-top: 10px;">${errorMsg}</p>
+                            <button onclick="loadPosts()" style="margin-top: 20px; padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">🔄 Újrapróbálás</button>
+                        </div>
+                    `);
+                }
+            });
+        }
+
+        // Bejegyzések megjelenítése
+        function displayPosts(posts) {
+            const postsContainer = $('#posts');
+            
+            if (posts.length === 0) {
+                postsContainer.html(`
+                    <div style="text-align: center; padding: 60px; color: #666;">
+                        <div style="font-size: 4em; margin-bottom: 20px;">📭</div>
+                        <h3 style="margin-bottom: 10px; color: #495057;">Még nincsenek bejegyzések</h3>
+                        <p style="font-size: 1.1em;">Légy te az első, aki megoszt valamit a közösséggel! ✨</p>
+                    </div>
+                `);
+                return;
+            }
+            
+            let html = '';
+            posts.forEach(post => {
+                html += `
+                    <div class="post">
+                        <div class="post-header">
+                            <span class="post-author">👤 ${post.userName}</span>
+                            <span class="post-date">🕒 ${new Date(post.createdAt).toLocaleString('hu-HU')}</span>
+                        </div>
+                        
+                        ${post.content ? `<div class="post-content">${post.content}</div>` : ''}
+                        
+                        ${post.imagePath ? `<img src="${post.imagePath}" alt="Feltöltött kép" class="post-image">` : ''}
+                        
+                        <div class="comments-section">
+                            <h4>💬 Kommentek (${post.comments.length})</h4>
+                            
+                            ${post.comments.length > 0 ? post.comments.map(comment => `
+                                <div class="comment">
+                                    <strong>👤 ${comment.userName}</strong>
+                                    <span style="color: #666; font-size: 0.9em; margin-left: 10px;">🕒 ${new Date(comment.createdAt).toLocaleString('hu-HU')}</span>
+                                    <p>${comment.content}</p>
+                                </div>
+                            `).join('') : '<p style="color: #666; font-style: italic; margin-bottom: 15px;">Még nincsenek kommentek. Légy te az első! 💭</p>'}
+                            
+                            <div class="comment-form">
+                                <input type="text" id="comment-${post.id}" placeholder="💭 Írj kommentet... (Enter = küldés)">
+                                <button onclick="addComment(${post.id})">📤 Küldés</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            postsContainer.html(html);
+        }
+
+        // Oldal betöltésekor
+        $(document).ready(function() {
+            console.log("🚀 Közösségi főoldal betöltve");
+            console.log("🎯 Minden funkció elérhető a főoldalon!");
+            if (checkLogin()) {
+                loadPosts();
+                
+                // Üdvözlő üzenet
+                setTimeout(() => {
+                    showMessage('🎉 Üdvözlünk a közösségi oldalon! Oszd meg gondolataidat és fedezd fel mások bejegyzéseit.', 'success');
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>
